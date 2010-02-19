@@ -3,17 +3,17 @@
 "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-	<display-name>Log server</display-name>
+	<display-name>Jubb Server</display-name>
 
 	<servlet>
-		<servlet-name>downloadLogServer</servlet-name>
-		<servlet-class>se.prb.logserver.DownloadLogServlet</servlet-class>
+		<servlet-name>queue-serlvet</servlet-name>
+		<servlet-class>jubb.servlet.QueueServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>downloadLogServer</servlet-name>
-		<url-pattern>/download</url-pattern>
+		<servlet-name>queue-serlvet</servlet-name>
+		<url-pattern>/queue</url-pattern>
 	</servlet-mapping>
 
 </web-app>
