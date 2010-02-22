@@ -1,29 +1,15 @@
-package web.shrimp.client.event.client;
+package jubb.client;
 
 public interface JubbClient {
 
 	/**
-	 * Post a job to the queue.
+	 * Post a job in serialized form to the queue.
 	 */
-	public void post(Priority priority, Object data);
+	public void post(int priority, String data);
 
 	/**
-	 * Take the first job off a queue and mark it as 'in progress'.
+	 * Post a job to the queue, using JSON as serializtion method.
 	 */
-	public Job start();
+	public void post(int priority, Object data);
 
-	/**
-	 * Mark the given job 'finished'.
-	 */
-	public void finish(Job job);
-
-	/**
-	 * Functionally equvalent to an atomic finishJob(startJob()) operation.
-	 */
-	public Job take();
-
-	public static class Job {
-		final int id;
-		final Object data;
-	}
 }
