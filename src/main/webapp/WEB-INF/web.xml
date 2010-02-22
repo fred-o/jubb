@@ -13,7 +13,7 @@
 
 	<servlet-mapping>
 		<servlet-name>queue-serlvet</servlet-name>
-		<url-pattern>/queue</url-pattern>
+		<url-pattern>/queue/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

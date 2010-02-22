@@ -38,6 +38,7 @@ public class DirectJubbClient implements JubbClient {
 		HttpPost call = new HttpPost(path);
 		HttpParams params = call.getParams();
 		params.setIntParameter("priority", priority);		
+		params.setParameter("data", data);
 		try {
 			httpClient.execute(host, call);
 		} catch (ClientProtocolException cpe) {
