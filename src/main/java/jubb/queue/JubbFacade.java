@@ -1,6 +1,5 @@
 package jubb.queue;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -8,13 +7,13 @@ import java.io.OutputStreamWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import jubb.client.Job;
-import jubb.queue.JubbFacade.QueueStatusBean;
+import jubb.queue.JubbFacade;
 import jubb.queue.JubbQueue;
 import jubb.queue.JubbQueueManager;
 import jubb.queue.bdb.BDBQueueManager;
@@ -28,15 +27,13 @@ public class JubbFacade {
 
 	private Pattern QUEUE = Pattern.compile("/(\\w+)/?");
 
-	public JubbFacade(String mountPoint, File store) {
-		this(mountPoint, store, new BDBQueueManager());
+	public JubbFacade(ServletConfig cfg) {
+		this(null, new BDBQueueManager());
 	}
 
-	public JubbFacade(String mountPoint, File store, JubbQueueManager manager) {
-
+	public JubbFacade(File store, JubbQueueManager manager) {
 		this.manager = manager;
 		this.mapper = new ObjectMapper();
-
 	}
 
 	protected void sendString(HttpServletResponse response, String data) throws IOException {
@@ -61,7 +58,7 @@ public class JubbFacade {
 		}
 	}
 
-	public void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void processGet(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String path = request.getPathInfo();
 			if (path != null) {
@@ -69,32 +66,55 @@ public class JubbFacade {
 				if (m.matches()) {
 					JubbQueue q = manager.getQueue(m.group(1));
 					if (q != null) {
-						if ("POST".equals(request.getMethod())) {
-							String op = request.getParameter("op");
-							if ("take".equals(op)) {
-								sendString(response, q.take());
-							} else {
-								// default is 'add'
-								String data = request.getParameter("data");
-								if (data != null) {
-									q.add(getPriority(request), data);
-								} 
-							}
-							response.sendError(HttpServletResponse.SC_OK);
-							return;
-						} else if ("GET".equals(request.getMethod())) {
-							// send status
-							sendObject(response, new QueueStatusBean(q.size()));
-							return;
-						} 
-						response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
+						sendObject(response, new QueueStatusBean(q.size()));
 						return;
 					} 
 				} 
 			} 
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
 		} finally {
-			response.flushBuffer();
+			try {
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
+	}
+
+	public void processPost(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String path = request.getPathInfo();
+			if (path != null) {
+				Matcher m = QUEUE.matcher(path);
+				if (m.matches()) {
+					JubbQueue q = manager.getQueue(m.group(1));
+					if (q != null) {
+						String op = request.getParameter("op");
+						if ("take".equals(op)) {
+							sendString(response, q.take());
+						} else {
+							// default is 'add'
+							String data = request.getParameter("data");
+							if (data != null) {
+								q.add(getPriority(request), data);
+							} 
+						}
+						response.sendError(HttpServletResponse.SC_OK);
+						return;
+					} 
+				} 
+			} 
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		} finally {
+			try {
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
 		}
 	}
 

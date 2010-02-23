@@ -1,7 +1,5 @@
 package jubb.queue;
 
-import java.util.List;
-
 import jubb.queue.JubbQueue;
 
 public interface JubbQueueManager {
