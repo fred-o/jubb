@@ -72,7 +72,9 @@ public class JubbFacade {
 			} catch (IllegalArgumentException iae) { 
 			} catch (NullPointerException npe) { }
 
-			response.setStatus(callback.process(op));
+			String path = request.getPathInfo() != null ? request.getPathInfo() : "";
+
+			response.setStatus(callback.process(path, op));
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		} finally {
@@ -86,16 +88,13 @@ public class JubbFacade {
 
 	public void processGet(final HttpServletRequest request, final HttpServletResponse response) {
 		_process(request, response, new ProcessCallback() {
-				public int process(Op op) throws IOException {
-					String path = request.getPathInfo();
-					if (path != null) {
-						Matcher m = QUEUE.matcher(path);
-						if (m.matches()) {
-							JubbQueue q = manager.getQueue(m.group(1));
-							if (q != null) {
-								sendObject(response, new QueueStatusBean(q.size()));
-								return HttpServletResponse.SC_OK;
-							} 
+				public int process(String path, Op op) throws IOException {
+					Matcher m = QUEUE.matcher(path);
+					if (m.matches()) {
+						JubbQueue q = manager.getQueue(m.group(1));
+						if (q != null) {
+							sendObject(response, new QueueStatusBean(q.size()));
+							return HttpServletResponse.SC_OK;
 						} 
 					} 
 					return HttpServletResponse.SC_NOT_FOUND;
@@ -105,24 +104,22 @@ public class JubbFacade {
 
 	public void processPost(final HttpServletRequest request, final HttpServletResponse response) {
 		_process(request, response, new ProcessCallback() {
-				public int process(Op op) throws IOException {
-					String path = request.getPathInfo();
-					if (path != null) {
-						Matcher m = QUEUE.matcher(path);
-						if (m.matches()) {
-							JubbQueue q = manager.getQueue(m.group(1));
-							if (q != null) {
-								if (op == TAKE) {
-									sendString(response, q.take());
-								} else {
-									// default is 'add'
-									String data = request.getParameter("data");
-									if (data != null) {
-										q.add(getPriority(request), data);
-									} 
-								}
-								return HttpServletResponse.SC_OK;
-							} 
+				public int process(String path, Op op) throws IOException {
+					Matcher m = QUEUE.matcher(path);
+					if (m.matches()) {
+						JubbQueue q = manager.getQueue(m.group(1));
+						if (q != null) {
+							if (op == TAKE) {
+								sendString(response, q.take());
+							} else {
+								// default is 'add'
+								String data = request.getParameter("data");
+								if (data != null) {
+									q.add(getPriority(request), data);
+								} 
+							}
+							return HttpServletResponse.SC_OK;
+
 						} 
 					} 
 					return HttpServletResponse.SC_NOT_FOUND;
@@ -131,7 +128,7 @@ public class JubbFacade {
 	}
 
 	static interface ProcessCallback {
-		public int process(Op op) throws IOException;
+		public int process(String path, Op op) throws IOException;
 	}
 
 	public class QueueStatusBean {
