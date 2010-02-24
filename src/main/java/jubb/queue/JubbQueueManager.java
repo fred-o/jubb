@@ -1,5 +1,7 @@
 package jubb.queue;
 
+import java.util.Iterator;
+
 import jubb.queue.JubbQueue;
 
 public interface JubbQueueManager {
@@ -14,6 +16,8 @@ public interface JubbQueueManager {
 	 */
 	public void createQueue(String name);
 
+	
+	public Iterator<String> getQueueNames();
 	
 
 }

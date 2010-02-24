@@ -2,6 +2,7 @@ package jubb.queue.jq;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -32,6 +33,10 @@ public class JournalingQueueManager implements JubbQueueManager {
 				queues.put(name, new JournalingQueue(new File(baseDir, name)));
 			} 
 		}
+	}
+
+	public Iterator<String> getQueueNames() {
+		return queues.keySet().iterator();
 	}
     
 }
