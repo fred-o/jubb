@@ -18,9 +18,16 @@ public class JournalingQueue implements JubbQueue {
 
 		Job job = new Job(priority, System.currentTimeMillis(), data);
 		this._queue.add(job);
+
+		System.out.println(_queue);
 	}
 
-	public String take() {
+	public String take() throws InterruptedException {
+		Job job = this._queue.take();
+		return job.data;
+	}
+
+	public String poll() {
 		Job job = this._queue.poll();
 		return job != null ? job.data : null;
 	}

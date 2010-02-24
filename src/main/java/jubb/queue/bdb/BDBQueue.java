@@ -21,6 +21,10 @@ public class BDBQueue implements JubbQueue {
 		return null;
 	}
 
+	public String poll() {
+		return null;
+	}
+
 	public int size() {
 		return 0;
 	}

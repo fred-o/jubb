@@ -20,7 +20,7 @@ import jubb.queue.jq.JournalingQueueManager;
  */
 public class JubbFacade {
 	public enum Op {
-		TAKE;
+		POLL, TAKE, ADD;
 	}
 
 	private JubbQueueManager manager;
@@ -72,6 +72,8 @@ public class JubbFacade {
 			String path = request.getPathInfo() != null ? request.getPathInfo() : "";
 
 			response.setStatus(callback.process(path, op));
+		} catch (InterruptedException ie) {
+			// TODO: handle timeout
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		} finally {
@@ -101,12 +103,14 @@ public class JubbFacade {
 
 	public void processPost(final HttpServletRequest request, final HttpServletResponse response) {
 		_process(request, response, new ProcessCallback() {
-				public int process(String path, Op op) throws IOException {
+				public int process(String path, Op op) throws IOException, InterruptedException {
 					Matcher m = QUEUE.matcher(path);
 					if (m.matches()) {
 						JubbQueue q = manager.getQueue(m.group(1));
 						if (q != null) {
-							if (op == Op.TAKE) {
+							if (op == Op.POLL) {
+								sendString(response, q.poll());
+							} else if (op == Op.TAKE) {
 								sendString(response, q.take());
 							} else {
 								// default is 'add'
@@ -117,7 +121,6 @@ public class JubbFacade {
 								} 
 							}
 							return HttpServletResponse.SC_OK;
-
 						} 
 					} 
 					return HttpServletResponse.SC_NOT_FOUND;
@@ -126,7 +129,7 @@ public class JubbFacade {
 	}
 
 	static interface ProcessCallback {
-		public int process(String path, Op op) throws IOException;
+		public int process(String path, Op op) throws IOException, InterruptedException;
 	}
 
 	public class QueueStatusBean {
@@ -137,11 +140,11 @@ public class JubbFacade {
 		}
 
 		public int getSize() {
-		    return size;
+			return size;
 		}
 		
 		public void setSize(int size) {
-		    this.size = size;
+			this.size = size;
 		}
 	}
  
