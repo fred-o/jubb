@@ -42,6 +42,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+		   <groupId>log4j</groupId>
+		   <artifactId>log4j</artifactId>
+		   <version>1.2.14</version>
+		</dependency>
+		<dependency>
 			<groupId>com.sleepycat</groupId>
 			<artifactId>je</artifactId>
 			<version>4.0.92</version>

@@ -13,12 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import jubb.queue.JubbFacade;
-import jubb.queue.JubbQueue;
-import jubb.queue.JubbQueueManager;
-import jubb.queue.bdb.BDBQueueManager;
-
-import static jubb.queue.JubbFacade.Op.*;
+import jubb.queue.jq.JournalingQueueManager;
 
 /**
  * This class provides a simple facade for Jubb services. 
@@ -34,7 +29,9 @@ public class JubbFacade {
 	private Pattern QUEUE = Pattern.compile("/(\\w+)/?");
 
 	public JubbFacade(ServletConfig cfg) {
-		this(null, new BDBQueueManager());
+		this(null, new JournalingQueueManager(null));
+
+		manager.createQueue("test");
 	}
 
 	public JubbFacade(File store, JubbQueueManager manager) {
@@ -109,11 +106,12 @@ public class JubbFacade {
 					if (m.matches()) {
 						JubbQueue q = manager.getQueue(m.group(1));
 						if (q != null) {
-							if (op == TAKE) {
+							if (op == Op.TAKE) {
 								sendString(response, q.take());
 							} else {
 								// default is 'add'
 								String data = request.getParameter("data");
+								System.out.println("DATA: " + data);
 								if (data != null) {
 									q.add(getPriority(request), data);
 								} 
