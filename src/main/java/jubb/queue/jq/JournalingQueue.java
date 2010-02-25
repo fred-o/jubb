@@ -1,6 +1,7 @@
 package jubb.queue.jq;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import jubb.queue.JubbQueue;
@@ -8,18 +9,18 @@ import jubb.queue.jq.JournalingQueue;
 
 public class JournalingQueue implements JubbQueue {
 	private PriorityBlockingQueue<Job> _queue;
+	private Journal journal;
 
-	public JournalingQueue(File dir) {
+	public JournalingQueue(File dir) throws IOException {
 		this._queue = new PriorityBlockingQueue<Job>();
+
+		if (!dir.exists()) dir.mkdirs();
+		this.journal = new Journal(dir);
 	}
 
 	public void add(int priority, String data) {
-		System.out.println("ADD: " + priority + ", " + data);
-
 		Job job = new Job(priority, System.currentTimeMillis(), data);
 		this._queue.add(job);
-
-		System.out.println(_queue);
 	}
 
 	public String take() throws InterruptedException {

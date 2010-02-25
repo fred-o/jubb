@@ -1,5 +1,6 @@
 package jubb.queue;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import jubb.queue.JubbQueue;
@@ -14,7 +15,7 @@ public interface JubbQueueManager {
 	/**
 	 * Create the named queue.
 	 */
-	public void createQueue(String name);
+	public void createQueue(String name) throws IOException;
 
 	
 	public Iterator<String> getQueueNames();

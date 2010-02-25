@@ -1,6 +1,7 @@
 package jubb.servlet;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +11,7 @@ import jubb.queue.JubbFacade;
 public class QueueServlet extends HttpServlet {
 	private JubbFacade facade;
 	
-	public void init(ServletConfig cfg) {
+	public void init(ServletConfig cfg) throws ServletException {
 		this.facade = new JubbFacade(cfg);
 	}
 

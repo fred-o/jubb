@@ -11,12 +11,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import jubb.queue.JubbFacade.QueueStatusBean;
 import jubb.queue.JubbQueue;
 import jubb.queue.jq.JournalingQueueManager;
 
@@ -34,15 +34,19 @@ public class JubbFacade {
 	private Pattern ROOT = Pattern.compile("^/?$");
 	private Pattern QUEUE = Pattern.compile("^/(\\w+)/?$");
 
-	public JubbFacade(ServletConfig cfg) {
-		this(null, new JournalingQueueManager(null));
-
-		manager.createQueue("test");
+	public JubbFacade(ServletConfig cfg) throws ServletException {
+		this.mapper = new ObjectMapper();
+		try {
+			this.manager =  new JournalingQueueManager(getBaseDir(cfg));
+			manager.createQueue("test");
+		} catch (IOException ioe) {
+			throw new ServletException("Exception during init()", ioe);
+		}
 	}
 
-	public JubbFacade(File store, JubbQueueManager manager) {
-		this.manager = manager;
-		this.mapper = new ObjectMapper();
+	private File getBaseDir(ServletConfig cfg) {
+		// TODO: do proper resolution based on servlet config
+		return new File(new File(System.getProperty("user.home")), ".jubb");
 	}
 
 	protected void sendString(HttpServletResponse response, String data) throws IOException {
@@ -94,9 +98,6 @@ public class JubbFacade {
 	public void processGet(final HttpServletRequest request, final HttpServletResponse response) {
 		_process(request, response, new ProcessCallback() {
 				public int process(String path, Op op) throws IOException {
-
-					System.out.println("PATH: " + path);
-
 					Matcher m = QUEUE.matcher(path);
 					if (m.matches()) {
 						JubbQueue q = manager.getQueue(m.group(1));
