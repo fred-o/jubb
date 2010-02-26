@@ -109,7 +109,6 @@ public class Journal {
 		try {
 			nextInputStream();
 			try {
-//					while (in.available() > 0) {
 				while (true) {
 					Record r = readRecord();
 					if (r.op == 1) {

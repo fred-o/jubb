@@ -15,8 +15,6 @@ public class JournalingQueue implements JubbQueue {
 		this.journal = new Journal(dir);
 		this._queue = journal.restore();
 
-//		this._queue = new PriorityBlockingQueue<Job>();
-
 		if (!dir.exists()) dir.mkdirs();
 	}
 
@@ -76,7 +74,6 @@ public class JournalingQueue implements JubbQueue {
 		public String toString() {
 			return "[time=" + timestamp + ",prio=" + priority + ",data="+ data + "]";
 		}
-		
 	}
 	
 }

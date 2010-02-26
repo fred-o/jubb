@@ -75,8 +75,9 @@ public class JubbFacade {
 		try {
 			Op op = null;
 			try {
-				op = Op.valueOf(request.getParameter("op").toUpperCase());
+				op = Op.valueOf(request.getParameter("op").trim().toUpperCase());
 			} catch (IllegalArgumentException iae) { 
+				iae.printStackTrace();
 			} catch (NullPointerException npe) { }
 
 			String path = request.getPathInfo() != null ? request.getPathInfo() : "";
@@ -108,7 +109,6 @@ public class JubbFacade {
 					} 
 					m = ROOT.matcher(path);
 					if (m.matches()) {
-						System.out.println("STATUS");
 						Map<String, QueueStatusBean> qs = new HashMap<String, QueueStatusBean>();
 						for(Iterator<String> iter = manager.getQueueNames(); iter.hasNext(); ) {
 							String name = iter.next();
@@ -137,7 +137,6 @@ public class JubbFacade {
 							} else {
 								// default is 'add'
 								String data = request.getParameter("data");
-								System.out.println("DATA: " + data);
 								if (data != null) {
 									q.add(getPriority(request), data);
 								} 
