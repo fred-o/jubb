@@ -12,25 +12,35 @@ public class JournalingQueue implements JubbQueue {
 	private Journal journal;
 
 	public JournalingQueue(File dir) throws IOException {
-		this._queue = new PriorityBlockingQueue<Job>();
+		this.journal = new Journal(dir);
+		this._queue = journal.restore();
+
+//		this._queue = new PriorityBlockingQueue<Job>();
 
 		if (!dir.exists()) dir.mkdirs();
-		this.journal = new Journal(dir);
 	}
 
 	public void add(int priority, String data) {
 		Job job = new Job(priority, System.currentTimeMillis(), data);
+		this.journal.appendAdd(job);
 		this._queue.add(job);
+
+		System.out.println("ADD. " + _queue);
 	}
 
 	public String take() throws InterruptedException {
 		Job job = this._queue.take();
+		this.journal.appendRemove(job);
 		return job.data;
 	}
 
 	public String poll() {
 		Job job = this._queue.poll();
-		return job != null ? job.data : null;
+		if (job != null) {
+			this.journal.appendRemove(job);
+			return job.data;
+		} 
+		return null;
 	}
 
 	public int size() {
@@ -53,6 +63,18 @@ public class JournalingQueue implements JubbQueue {
 			if (ret != 0) 
 				return ret;
 			return (int) (this.timestamp - other.timestamp);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof Job))
+				return false;
+			return this.compareTo((Job)obj) == 0;
+		}
+
+		@Override
+		public String toString() {
+			return "[time=" + timestamp + ",prio=" + priority + ",data="+ data + "]";
 		}
 		
 	}
