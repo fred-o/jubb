@@ -27,7 +27,7 @@ public class JournalInput extends AbstractJournalAccess {
 	}
 
 	private void nextInputStream() throws IOException {
-		File f = nextFile();
+		File f = mostCurrentFile();
 		this.in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 	}
 
