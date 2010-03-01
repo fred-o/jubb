@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import jubb.queue.jq.Journal;
+import jubb.queue.jq.JournalInput;
 import jubb.queue.jq.JournalingQueue;
 
 import junit.framework.TestCase;
@@ -27,12 +27,12 @@ public class JournalTest extends TestCase {
 	}
 
 	public void testSingleAddAndRestore() throws Exception {
-		Journal jn1 = new Journal(baseDir);
+		JournalOutput jn1 = new JournalOutput(baseDir);
 		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test\"}");
 		jn1.appendAdd(j1);
 		jn1.close();
 
-		Journal jn2 = new Journal(baseDir);
+		JournalInput jn2 = new JournalInput(baseDir);
 		PriorityBlockingQueue q = jn2.restore();
 		assertNotNull(q);
 		assertEquals(1, q.size());
@@ -40,7 +40,7 @@ public class JournalTest extends TestCase {
 	}
 
 	public void testAddAndRestoreSeveralJobs() throws Exception {
-		Journal jn1 = new Journal(baseDir);
+		JournalOutput jn1 = new JournalOutput(baseDir);
 		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test1\"}");
 		JournalingQueue.Job j2 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test2\"}");
 		JournalingQueue.Job j3 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test3\"}");
@@ -49,7 +49,7 @@ public class JournalTest extends TestCase {
 		jn1.appendAdd(j3);
 		jn1.close();
 
-		Journal jn2 = new Journal(baseDir);
+		JournalInput jn2 = new JournalInput(baseDir);
 		PriorityBlockingQueue q = jn2.restore();
 		assertNotNull(q);
 		assertEquals(3, q.size());
@@ -59,7 +59,7 @@ public class JournalTest extends TestCase {
 	}
 
 	public void testAddRemoveAndRestoreSeveralJobs() throws Exception {
-		Journal jn1 = new Journal(baseDir);
+		JournalOutput jn1 = new JournalOutput(baseDir);
 		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test1\"}");
 		JournalingQueue.Job j2 = new JournalingQueue.Job(0, System.currentTimeMillis(), "{\"message\":\"test2\"}");
 		JournalingQueue.Job j3 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test3\"}");
@@ -72,7 +72,7 @@ public class JournalTest extends TestCase {
 
 		jn1.close();
 
-		Journal jn2 = new Journal(baseDir);
+		JournalInput jn2 = new JournalInput(baseDir);
 		PriorityBlockingQueue q = jn2.restore();
 		assertNotNull(q);
 		assertEquals(2, q.size());
