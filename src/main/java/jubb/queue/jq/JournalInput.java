@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
+
+import jubb.queue.jq.JournalingQueue;
 
 public class JournalInput extends AbstractJournalAccess {
     private static final Logger LOG = Logger.getLogger(JournalInput.class);
@@ -39,28 +42,30 @@ public class JournalInput extends AbstractJournalAccess {
 		}
 	}
 
-	public PriorityBlockingQueue<JournalingQueue.Job> restore() {
-		PriorityBlockingQueue<JournalingQueue.Job> q = new PriorityBlockingQueue<JournalingQueue.Job>();
+	public BlockingQueue<JournalingQueue.Job> restore() {
+		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
 		try {
 			nextInputStream();
 			try {
+				q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
 				while (true) {
 					Record r = readRecord();
 					if (r.op == 1) {
 						q.add(r.job);
 					} else if (r.op == 2) {
-						q.remove(r.job);
+						q.remove();
 					} 
 				}
 			} finally {
 				in.close();
 			}
+		} catch (ClassNotFoundException cnfe) {
+			LOG.error("Could not restore job queue from journal", cnfe);
 		} catch (IOException ioe) {
 			LOG.error("Could not restore job queue from journal", ioe);
 		}
 		System.out.println("Restored queue with " + q.size() + " jobs");
 		System.out.println(q);
-		
 		return q;
 	}
 	

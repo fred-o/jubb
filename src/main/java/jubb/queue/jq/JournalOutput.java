@@ -5,16 +5,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
+
+import jubb.queue.jq.JournalingQueue;
 
 public class JournalOutput extends AbstractJournalAccess {
     private static final Logger LOG = Logger.getLogger(JournalOutput.class);
 	private ObjectOutputStream out;
 
-	public JournalOutput(File dir) {
+	public JournalOutput(File dir, BlockingQueue<JournalingQueue.Job> q) {
 		super(dir);
-
+		snapshot(q);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
 					close();
@@ -42,8 +45,6 @@ public class JournalOutput extends AbstractJournalAccess {
 
 	private void appendRecord(int op, JournalingQueue.Job job) {
 		try {
-			if (out == null)
-				nextOutputStream();
 			try {
 				this.out.writeObject(new Record(op, job));
  			} finally {
@@ -60,6 +61,18 @@ public class JournalOutput extends AbstractJournalAccess {
 
 	public void appendRemove(JournalingQueue.Job job) {
 		appendRecord(2, job);
+	}
+
+	public void snapshot(BlockingQueue<JournalingQueue.Job> q) {
+		try {
+			System.out.println("SNAPSHOT!");
+			nextOutputStream();
+			this.out.writeObject(q);
+			this.out.flush();
+			deleteMarkedFiles();
+		}
+		catch (IOException ioe) {
+		}
 	}
 
 }

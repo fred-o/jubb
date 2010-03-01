@@ -3,16 +3,22 @@ package jubb.queue.jq;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import jubb.queue.JubbQueue;
 import jubb.queue.jq.JournalInput;
 import jubb.queue.jq.JournalOutput;
 import jubb.queue.jq.JournalingQueue;
 
+/**
+ * This is a simple persistant queue implementation that uses a
+ * journaling scheme based on Java serialization. It does not support
+ * different priorities for jobs.
+ */
 public class JournalingQueue implements JubbQueue {
-	private PriorityBlockingQueue<Job> _queue;
+	private BlockingQueue<Job> _queue;
 	private JournalOutput output;
+	private int recordsWritten = 0;
 
 	public JournalingQueue(File dir) throws IOException {
 		if (!dir.exists()) dir.mkdirs();
@@ -21,13 +27,22 @@ public class JournalingQueue implements JubbQueue {
 		this._queue = input.restore();
 		input.close();
 
-		this.output = new JournalOutput(dir);
+		this.output = new JournalOutput(dir, this._queue);
+	}
+
+	private void snapshotMaybe() {
+		System.out.println("RECORDS: " + this.recordsWritten);
+		if(++this.recordsWritten > 5) {
+			output.snapshot(_queue);
+			this.recordsWritten = 0;
+		}
 	}
 
 	public void add(int priority, String data) {
 		Job job = new Job(priority, System.currentTimeMillis(), data);
 		this.output.appendAdd(job);
 		this._queue.add(job);
+		snapshotMaybe();
 
 		System.out.println("ADD. " + _queue);
 	}
@@ -35,6 +50,7 @@ public class JournalingQueue implements JubbQueue {
 	public String take() throws InterruptedException {
 		Job job = this._queue.take();
 		this.output.appendRemove(job);
+		snapshotMaybe();
 		return job.data;
 	}
 
@@ -42,6 +58,7 @@ public class JournalingQueue implements JubbQueue {
 		Job job = this._queue.poll();
 		if (job != null) {
 			this.output.appendRemove(job);
+			snapshotMaybe();
 			return job.data;
 		} 
 		return null;

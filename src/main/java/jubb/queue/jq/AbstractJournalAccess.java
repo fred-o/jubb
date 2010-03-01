@@ -31,8 +31,8 @@ public abstract class AbstractJournalAccess {
 		if (this.current != null) {
 			markForDeletion(this.current);
 		} 
-		this.current = dir.createTempFile("jubb", ".jq", dir);
-		return current;
+		this.current = File.createTempFile("jubb", ".jq", dir);
+		return this.current;
 	}
 
 	protected File mostCurrentFile() throws IOException {
@@ -40,7 +40,7 @@ public abstract class AbstractJournalAccess {
 		if (files.length > 0) {
 			Arrays.sort(files, new Comparator<File>() {
 						public int compare(File f1, File f2) {
-							return (int)(f1.lastModified() - f2.lastModified());
+							return (int)(f2.lastModified() - f1.lastModified());
 						}
 					});
 			for(int i = 1; i < files.length; i++) {
