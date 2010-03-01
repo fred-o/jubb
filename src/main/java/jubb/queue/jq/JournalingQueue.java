@@ -2,6 +2,7 @@ package jubb.queue.jq;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import jubb.queue.JubbQueue;
@@ -45,7 +46,7 @@ public class JournalingQueue implements JubbQueue {
 		return _queue.size();
 	}
 	
-	static class Job implements Comparable<Job> {
+	static class Job implements Comparable<Job>, Serializable {
 		final long timestamp;
 		final int priority;
 		final String data;

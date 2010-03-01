@@ -9,11 +9,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.Logger;
+
+import com.sleepycat.je.rep.util.ldiff.Record;
 
 import jubb.queue.JubbQueue;
 
@@ -44,7 +47,7 @@ public class Journal {
 			out.close();
 		}
 		nextFile();
-		this.out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(this.current)));
+		this.out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(this.current, true)));
 	}
 
 	private void nextInputStream() throws IOException {
@@ -68,15 +71,9 @@ public class Journal {
 		try {
 			if (out == null)
 				nextOutputStream();
-			
 			try {
-				this.out.writeInt(op);
-				this.out.writeInt(job.priority);
-				this.out.writeLong(job.timestamp);
-				byte[] buf = job.data.getBytes();
-				this.out.writeInt(buf.length);
-				this.out.write(buf);
-			} finally {
+				this.out.writeObject(new Record(op, job));
+ 			} finally {
 				this.out.flush();
 			}
 		} catch (IOException ioe) {
@@ -93,15 +90,11 @@ public class Journal {
 	}
 
 	private Record readRecord() throws IOException {
-		int op = this.in.readInt();
-		int priority = this.in.readInt();
-		long timestamp = this.in.readLong();
-		int len = this.in.readInt();
-		byte[] buf = new byte[len];
-		int r = this.in.read(buf, 0, len); 
-		if (r != len) 
-			throw new IOException("Expected " + len + " bytes but got " + r);
-		return new Record(op, new JournalingQueue.Job(priority, timestamp, new String(buf)));
+		try {
+			return (Record) this.in.readObject();
+		} catch (ClassNotFoundException cnfe) {
+			throw new IOException(cnfe);
+		}
 	}
 
 	public PriorityBlockingQueue<JournalingQueue.Job> restore() {
@@ -129,7 +122,7 @@ public class Journal {
 		return q;
 	}
 
-	static class Record {
+	static class Record implements Serializable {
 		public final int op;
 		public final JournalingQueue.Job job;
 
