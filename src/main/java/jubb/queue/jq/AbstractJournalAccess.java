@@ -13,8 +13,9 @@ public abstract class AbstractJournalAccess {
 	private File current;
 	private List<File> markedForDelete = new LinkedList<File>();
 
-	public AbstractJournalAccess(File dir) {
+	public AbstractJournalAccess(File dir) throws IOException {
 		this.dir = dir;
+		this.current = mostCurrentFile();
 	}
 
 	protected void markForDeletion(File f) {
@@ -23,14 +24,13 @@ public abstract class AbstractJournalAccess {
 
 	protected void deleteMarkedFiles() throws IOException {
 		for(File f: this.markedForDelete) {
+			System.out.println("DELETING " + f.getAbsolutePath());
 		    f.delete();
 		}
 	}
 	
 	protected File nextFile() throws IOException {
-		if (this.current != null) {
-			markForDeletion(this.current);
-		} 
+		markForDeletion(this.current);
 		this.current = File.createTempFile("jubb", ".jq", dir);
 		return this.current;
 	}

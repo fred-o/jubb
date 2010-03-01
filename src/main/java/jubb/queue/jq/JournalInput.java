@@ -16,7 +16,7 @@ public class JournalInput extends AbstractJournalAccess {
     private static final Logger LOG = Logger.getLogger(JournalInput.class);
 	private ObjectInputStream in;
 
-	public JournalInput(File dir) {
+	public JournalInput(File dir) throws IOException {
 		super(dir);
 	}
 
@@ -34,14 +34,6 @@ public class JournalInput extends AbstractJournalAccess {
 		this.in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 	}
 
-	private Record readRecord() throws IOException {
-		try {
-			return (Record) this.in.readObject();
-		} catch (ClassNotFoundException cnfe) {
-			throw new IOException(cnfe);
-		}
-	}
-
 	public BlockingQueue<JournalingQueue.Job> restore() {
 		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
 		try {
@@ -49,7 +41,7 @@ public class JournalInput extends AbstractJournalAccess {
 			try {
 				q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
 				while (true) {
-					Record r = readRecord();
+					Record r = (Record) this.in.readObject();
 					if (r.op == 1) {
 						q.add(r.job);
 					} else if (r.op == 2) {
@@ -63,6 +55,12 @@ public class JournalInput extends AbstractJournalAccess {
 			LOG.error("Could not restore job queue from journal", cnfe);
 		} catch (IOException ioe) {
 			LOG.error("Could not restore job queue from journal", ioe);
+		}
+		try {
+		    deleteMarkedFiles();
+		}
+		catch (IOException ioe) {
+			LOG.error("Error deleting stale log files", ioe);
 		}
 		System.out.println("Restored queue with " + q.size() + " jobs");
 		System.out.println(q);

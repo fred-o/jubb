@@ -15,7 +15,7 @@ public class JournalOutput extends AbstractJournalAccess {
     private static final Logger LOG = Logger.getLogger(JournalOutput.class);
 	private ObjectOutputStream out;
 
-	public JournalOutput(File dir, BlockingQueue<JournalingQueue.Job> q) {
+	public JournalOutput(File dir, BlockingQueue<JournalingQueue.Job> q) throws IOException {
 		super(dir);
 		snapshot(q);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
