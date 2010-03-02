@@ -41,17 +41,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	 * @throws 
 	 */
 	public void post(int priority, String data) {
-		HttpPost call = new HttpPost(path);
-		HttpParams params = call.getParams();
-		params.setIntParameter("priority", priority);		
-		params.setParameter("data", data);
-		try {
-			httpClient.execute(host, call);
-		} catch (ClientProtocolException cpe) {
-			cpe.printStackTrace();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
+		_invoke("post", data, EMPTY);
 	}
 
 	public void post(int priority, Object data) {
@@ -66,14 +56,18 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		}
 	}
 
+	private <C> C _invoke(String op, Call<C> callback) {
+		return _invoke(op, null, callback);
+	}
+
 	/**
 	 * General method for accessing the queue and getting a job object
 	 * back.
 	 */
-	private <C> C _invoke(String op, JubbCall<C> callback) {
+	private <C> C _invoke(String op, String data, Call<C> callback) {
 		try {
 			HttpPost call = new HttpPost(path);
-			call.getParams().setParameter("op", op);
+			call.getParams().setParameter("op", op).setParameter("data", data);
 			HttpResponse res = httpClient.execute(call);
 			if (res.getStatusLine().getStatusCode() == 200) {
 				InputStream in = res.getEntity().getContent();
@@ -89,20 +83,25 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		return null;
 	}
 
-	private static JubbCall<InputStream> STREAM = new JubbCall<InputStream>() {
+	private static Call<Void> EMPTY = new Call<Void>() {
+		public Void call(InputStream in) {
+			return null;
+		}
+	};
+
+	private static Call<InputStream> STREAM = new Call<InputStream>() {
 		public InputStream call(InputStream in) {
 			return in;
 		}
 	};
 
-	private <T> JubbCall<T> createCall(final Class<T> clazz) {
-		return new JubbCall<T>() {
+	private <T> Call<T> createJsonCall(final Class<T> clazz) {
+		return new Call<T>() {
 			public T call(InputStream in) throws IOException {
 				return mapper.readValue(in, clazz);
 			}
 		};
 	}
-
 
 	public InputStream poll() {
 		return _invoke("poll", STREAM);
@@ -113,14 +112,14 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	}
 
 	public <T> T poll(Class<T> clazz) {
-		return _invoke("poll", createCall(clazz));
+		return _invoke("poll", createJsonCall(clazz));
 	}
 
 	public <T> T take(final Class<T> clazz) {
-		return _invoke("take", createCall(clazz));
+		return _invoke("take", createJsonCall(clazz));
 	}
 
-	static interface JubbCall<C> {
+	static interface Call<C> {
 		public C call(InputStream in) throws IOException;
 	}
 }
