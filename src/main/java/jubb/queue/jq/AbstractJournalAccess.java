@@ -19,7 +19,8 @@ public abstract class AbstractJournalAccess {
 	}
 
 	protected void markForDeletion(File f) {
-		this.markedForDelete.add(f);
+		if(f != null)
+			this.markedForDelete.add(f);
 	}
 
 	protected void deleteMarkedFiles() throws IOException {
@@ -27,6 +28,7 @@ public abstract class AbstractJournalAccess {
 			System.out.println("DELETING " + f.getAbsolutePath());
 		    f.delete();
 		}
+		this.markedForDelete.clear();
 	}
 	
 	protected File nextFile() throws IOException {

@@ -1,20 +1,27 @@
 package jubb.client;
 
+
+import java.io.InputStream;
+
 public interface JubbConsumer {
-    
-	/**
-	 * Take the first job off a queue and mark it as 'in progress'.
-	 */
-	public Job start();
+
+	public InputStream poll();
 
 	/**
-	 * Mark the given job 'finished'.
+	 * Take a job in non-serialized form from the queue, blocking
+	 * until one becomes avaiable if necessary.
 	 */
-	public void finish(Job job);
+	public InputStream take();
 
 	/**
-	 * Functionally equvalent to an atomic finishJob(startJob()) operation.
+	 * 
 	 */
-	public Job take();
+	public <T> T poll(Class<T> clazz);
+
+	/**
+	 * Take a job from the queue, blocking until one becomes available
+	 * if necessary.
+	 */
+	public <T> T take(Class<T> clazz);
 
 }
