@@ -4,11 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Arrays;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -38,7 +44,10 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	private <C> C _invoke(String op, String data, Call<C> callback) {
 		try {
 			HttpPost call = new HttpPost(uri);
-			call.getParams().setParameter("op", op).setParameter("data", data);
+			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
+				Arrays.asList(new BasicNameValuePair("data", data)));
+			call.setEntity(entity);
+
 			HttpResponse res = httpClient.execute(call);
 			if (res.getStatusLine().getStatusCode() == 200) {
 				InputStream in = res.getEntity().getContent();
@@ -47,7 +56,9 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 				} finally {
 					in.close();
 				}
-			} 
+			} else {
+				LOG.error("Calling '" + op + "' on queue at '" + uri + "' failed with reason: '" + res.getStatusLine().toString());
+			}
 		} catch (IOException ioe) {
 			LOG.error("Error calling '" + op + "' on queue at " + uri, ioe);
 		}
