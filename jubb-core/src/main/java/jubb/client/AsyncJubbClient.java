@@ -1,6 +1,6 @@
 package jubb.client;
 
-import java.net.URL;
+import java.net.URI;
 
 import jubb.client.AsyncJubbClient;
 import jubb.client.DirectJubbClient;
@@ -13,8 +13,8 @@ import jubb.client.DirectJubbClient;
 public class AsyncJubbClient implements JubbClient {
 	private DirectJubbClient _client;
 
-	public AsyncJubbClient(URL url) {
-		this._client = new DirectJubbClient(url);
+	public AsyncJubbClient(URI uri) {
+		this._client = new DirectJubbClient(uri);
 	}
 
 	public void post(int priority, String data) {

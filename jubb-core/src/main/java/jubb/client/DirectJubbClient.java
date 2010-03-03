@@ -3,16 +3,12 @@ package jubb.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
+import java.net.URI;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -29,19 +25,40 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	private HttpClient httpClient = new DefaultHttpClient();
 	private ObjectMapper mapper = new ObjectMapper();
 
-	private HttpHost host;
-	private String path;
+	private URI uri;
 
-	public DirectJubbClient(URL url) {
-		this.host = new HttpHost(url.getHost());
-		this.path = url.getPath();
+	public DirectJubbClient(URI uri) {
+		this.uri = uri;
+	}
+
+	/**
+	 * General method for accessing the queue and getting a job object
+	 * back.
+	 */
+	private <C> C _invoke(String op, String data, Call<C> callback) {
+		try {
+			HttpPost call = new HttpPost(uri);
+			call.getParams().setParameter("op", op).setParameter("data", data);
+			HttpResponse res = httpClient.execute(call);
+			if (res.getStatusLine().getStatusCode() == 200) {
+				InputStream in = res.getEntity().getContent();
+				try {
+					return callback.call(in);
+				} finally {
+					in.close();
+				}
+			} 
+		} catch (IOException ioe) {
+			LOG.error("Error calling '" + op + "' on queue at " + uri, ioe);
+		}
+		return null;
 	}
 
 	/**
 	 * @throws 
 	 */
 	public void post(int priority, String data) {
-		_invoke("post", data, EMPTY);
+		_invoke("post", data, VOID);
 	}
 
 	public void post(int priority, Object data) {
@@ -60,30 +77,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		return _invoke(op, null, callback);
 	}
 
-	/**
-	 * General method for accessing the queue and getting a job object
-	 * back.
-	 */
-	private <C> C _invoke(String op, String data, Call<C> callback) {
-		try {
-			HttpPost call = new HttpPost(path);
-			call.getParams().setParameter("op", op).setParameter("data", data);
-			HttpResponse res = httpClient.execute(call);
-			if (res.getStatusLine().getStatusCode() == 200) {
-				InputStream in = res.getEntity().getContent();
-				try {
-					return callback.call(in);
-				} finally {
-					in.close();
-				}
-			} 
-		} catch (IOException ioe) {
-			LOG.error("Error calling '" + op + "' on queue at " + path, ioe);
-		}
-		return null;
-	}
-
-	private static Call<Void> EMPTY = new Call<Void>() {
+	private static Call<Void> VOID = new Call<Void>() {
 		public Void call(InputStream in) {
 			return null;
 		}
