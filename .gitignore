@@ -2,4 +2,8 @@
 .classpath
 .settings
 target
-src/test/tmp
+*/.project
+*/.classpath
+*/.settings
+*/target
+jubb-core/src/test/tmp

@@ -1,12 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>nu.mulli</groupId>
-	<artifactId>jubb</artifactId>
-	<packaging>war</packaging>
+	<groupId>nu.mulli.jubb</groupId>
+	<artifactId>jubb-all</artifactId>
+	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>jubb</name>
 	<url>http://maven.apache.org</url>
+
+	<modules>
+		<module>jubb-core</module>
+		<module>jubb-servlet</module>
+	</modules>
 
 	<build>
 		<plugins>
@@ -18,70 +23,8 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<configuration>
-					<connectors>
-						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>8081</port>
-							<maxIdleTime>60000</maxIdleTime>
-						</connector>
-					</connectors>
-					<contextPath>/</contextPath>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
-
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		   <groupId>log4j</groupId>
-		   <artifactId>log4j</artifactId>
-		   <version>1.2.14</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sleepycat</groupId>
-			<artifactId>je</artifactId>
-			<version>4.0.92</version>
-		</dependency>
-		<dependency>
-		   <groupId>org.codehaus.jackson</groupId>
-		   <artifactId>jackson-core-asl</artifactId>
-		   <version>1.4.2</version>
-		</dependency>
-		<dependency>
-		   <groupId>org.codehaus.jackson</groupId>
-		   <artifactId>jackson-mapper-asl</artifactId>
-		   <version>1.4.2</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-		   <groupId>org.apache.httpcomponents</groupId>
-		   <artifactId>httpclient</artifactId>
-		   <version>4.0.1</version>
-		</dependency>
-	</dependencies>
-
-	<repositories>
-		<repository>
-			<id>oracleReleases</id>
-			<name>Oracle Released Java Packages</name>
-			<url>http://download.oracle.com/maven</url>
-			<layout>default</layout>
-		</repository>
-	</repositories>
 
 </project>
 
