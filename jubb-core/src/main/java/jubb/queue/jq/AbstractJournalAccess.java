@@ -53,8 +53,6 @@ public abstract class AbstractJournalAccess {
 		return null;
 	}
 
-	public abstract void close();
-
 	static class Record implements Serializable {
 		public final int op;
 		public final JournalingQueue.Job job;

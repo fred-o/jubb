@@ -45,8 +45,11 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		try {
 			HttpPost call = new HttpPost(uri);
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
-				Arrays.asList(new BasicNameValuePair("data", data)));
+				Arrays.asList(
+					new BasicNameValuePair("op", op), 
+					new BasicNameValuePair("data", data)));
 			call.setEntity(entity);
+			call.getParams().setIntParameter("http.connection.timeout", 10000);
 
 			HttpResponse res = httpClient.execute(call);
 			if (res.getStatusLine().getStatusCode() == 200) {
@@ -69,7 +72,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	 * @throws 
 	 */
 	public void post(int priority, String data) {
-		_invoke("post", data, VOID);
+		_invoke("add", data, VOID);
 	}
 
 	public void post(int priority, Object data) {

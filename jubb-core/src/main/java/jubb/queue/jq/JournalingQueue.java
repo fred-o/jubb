@@ -25,14 +25,12 @@ public class JournalingQueue implements JubbQueue {
 
 		JournalInput input = new JournalInput(dir);
 		this._queue = input.restore();
-		input.close();
-
 		this.output = new JournalOutput(dir, this._queue);
 	}
 
 	private void snapshotMaybe() {
 		System.out.println("RECORDS: " + this.recordsWritten);
-		if(++this.recordsWritten > 5) {
+		if(++this.recordsWritten > 100) {
 			output.snapshot(_queue);
 			this.recordsWritten = 0;
 		}

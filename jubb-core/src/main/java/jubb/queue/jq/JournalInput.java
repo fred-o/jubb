@@ -14,43 +14,31 @@ import jubb.queue.jq.JournalingQueue;
 
 public class JournalInput extends AbstractJournalAccess {
     private static final Logger LOG = Logger.getLogger(JournalInput.class);
-	private ObjectInputStream in;
 
 	public JournalInput(File dir) throws IOException {
 		super(dir);
 	}
 
-	public void close() {
-		try {
-		    in.close();
-		}
-		catch (IOException ioe) {
-			LOG.error("Error closing input", ioe);
-		}
-	}
-
-	private void nextInputStream() throws IOException {
-		File f = mostCurrentFile();
-		this.in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
-	}
-
 	public BlockingQueue<JournalingQueue.Job> restore() {
 		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
 		try {
-			nextInputStream();
-			try {
-				q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
-				while (true) {
-					Record r = (Record) this.in.readObject();
-					if (r.op == 1) {
-						q.add(r.job);
-					} else if (r.op == 2) {
-						q.remove();
-					} 
+			File f = mostCurrentFile();
+			if (f != null) {
+				ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
+				try {
+					q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
+					while (true) {
+						Record r = (Record) in.readObject();
+						if (r.op == 1) {
+							q.add(r.job);
+						} else if (r.op == 2) {
+							q.remove();
+						} 
+					}
+				} finally {
+					in.close();
 				}
-			} finally {
-				in.close();
-			}
+			} 
 		} catch (ClassNotFoundException cnfe) {
 			LOG.error("Could not restore job queue from journal", cnfe);
 		} catch (IOException ioe) {
