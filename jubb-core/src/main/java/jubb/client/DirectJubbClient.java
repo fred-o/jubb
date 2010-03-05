@@ -23,7 +23,7 @@ import jubb.client.JubbConsumer;
  * This simple implementation connects to a Jubb queue and posts its
  * jobs synchronusly. There are no facilities for retrying failed posts.
  */
-public class DirectJubbClient implements JubbClient, JubbConsumer {
+public class DirectJubbClient implements JubbClient {
 	private static final Logger LOG = Logger.getLogger(DirectJubbClient.class);
 	private HttpClient httpClient = new DefaultHttpClient();
 	private ObjectMapper mapper = new ObjectMapper();
@@ -38,7 +38,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	 * General method for accessing the queue and getting a job object
 	 * back.
 	 */
-	private <C> C _invoke(String op, String data, Call<C> callback) {
+	private <C> C _invoke(String op, String data, Call<C> callback, boolean close) {
 		try {
 			HttpPost call = new HttpPost(uri);
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
@@ -54,7 +54,8 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 				try {
 					return callback.call(in);
 				} finally {
-					in.close();
+					if (close)
+						in.close();
 				}
 			} else {
 				LOG.error("Calling '" + op + "' on queue at '" + uri + "' failed with reason: '" + res.getStatusLine().toString());
@@ -69,7 +70,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	 * @throws 
 	 */
 	public void add(String data) {
-		_invoke("add", data, VOID);
+		_invoke("add", data, VOID, true);
 	}
 
 	public void add(Object data) {
@@ -84,8 +85,8 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		}
 	}
 
-	private <C> C _invoke(String op, Call<C> callback) {
-		return _invoke(op, null, callback);
+	private <C> C _invoke(String op, Call<C> callback, boolean close) {
+		return _invoke(op, null, callback, close);
 	}
 
 	private static Call<Void> VOID = new Call<Void>() {
@@ -109,19 +110,19 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	}
 
 	public InputStream poll() {
-		return _invoke("poll", STREAM);
+		return _invoke("poll", STREAM, false);
 	}
 
 	public InputStream take() {
-		return _invoke("take", STREAM);
+		return _invoke("take", STREAM, false);
 	}
 
 	public <T> T poll(Class<T> clazz) {
-		return _invoke("poll", createJsonCall(clazz));
+		return _invoke("poll", createJsonCall(clazz), true);
 	}
 
 	public <T> T take(final Class<T> clazz) {
-		return _invoke("take", createJsonCall(clazz));
+		return _invoke("take", createJsonCall(clazz), true);
 	}
 
 	static interface Call<C> {

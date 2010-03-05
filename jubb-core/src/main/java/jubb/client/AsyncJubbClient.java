@@ -1,5 +1,6 @@
 package jubb.client;
 
+import java.io.InputStream;
 import java.net.URI;
 
 import jubb.client.AsyncJubbClient;
@@ -23,6 +24,22 @@ public class AsyncJubbClient implements JubbClient {
     
 	public void add(Object data) {
 		this._client.add(data);
+	}
+
+	public InputStream poll() {
+		return this._client.poll();
+	}
+
+	public <T> T poll(Class<T> clazz) {
+		return this._client.poll(clazz);
+	}
+
+	public InputStream take() {
+		return this._client.take();
+	}
+
+	public <T> T take(Class<T> clazz) {
+		return this._client.take(clazz);
 	}
 
 }
