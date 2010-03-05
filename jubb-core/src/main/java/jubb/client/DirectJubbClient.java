@@ -17,7 +17,6 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import jubb.client.DirectJubbClient;
-import jubb.client.JubbConsumer;
 
 /**
  * This simple implementation connects to a Jubb queue and posts its
