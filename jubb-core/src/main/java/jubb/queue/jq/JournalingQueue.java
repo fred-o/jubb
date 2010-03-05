@@ -36,8 +36,8 @@ public class JournalingQueue implements JubbQueue {
 		}
 	}
 
-	public void add(int priority, String data) {
-		Job job = new Job(priority, System.currentTimeMillis(), data);
+	public void add(String data) {
+		Job job = new Job(System.currentTimeMillis(), data);
 		this.output.appendAdd(job);
 		this._queue.add(job);
 		snapshotMaybe();
@@ -66,34 +66,30 @@ public class JournalingQueue implements JubbQueue {
 		return _queue.size();
 	}
 	
-	static class Job implements Comparable<Job>, Serializable {
+	static class Job implements Serializable {
 		final long timestamp;
-		final int priority;
 		final String data;
 
-		public Job(int priority, long timestamp, String data) {
-			this.priority = priority;
+		public Job(long timestamp, String data) {
+			if (data == null) 
+				throw new IllegalArgumentException("data cannot be null");
 			this.timestamp = timestamp;
 			this.data = data;
-		}
-
-		public int compareTo(Job other) {
-			int ret = this.priority - other.priority;
-			if (ret != 0) 
-				return ret;
-			return (int) (this.timestamp - other.timestamp);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof Job))
 				return false;
-			return this.compareTo((Job)obj) == 0;
+			Job other = (Job) obj;
+			if (this.timestamp != other.timestamp) 
+				return false;
+			return this.data.equals(other.data);
 		}
 
 		@Override
 		public String toString() {
-			return "[time=" + timestamp + ",prio=" + priority + ",data="+ data + "]";
+			return "[time=" + timestamp + ",data="+ data + "]";
 		}
 	}
 	

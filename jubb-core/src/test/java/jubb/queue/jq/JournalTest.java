@@ -30,7 +30,7 @@ public class JournalTest extends TestCase {
 
 	public void testSingleAddAndRestore() throws Exception {
 		JournalOutput jo = new JournalOutput(baseDir, new LinkedBlockingQueue<JournalingQueue.Job>());
-		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test\"}");
+		JournalingQueue.Job j1 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test\"}");
 		jo.appendAdd(j1);
 		jo.close();
 
@@ -43,9 +43,9 @@ public class JournalTest extends TestCase {
 
 	public void testAddAndRestoreSeveralJobs() throws Exception {
 		JournalOutput jo = new JournalOutput(baseDir, new LinkedBlockingQueue<JournalingQueue.Job>());
-		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test1\"}");
-		JournalingQueue.Job j2 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test2\"}");
-		JournalingQueue.Job j3 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test3\"}");
+		JournalingQueue.Job j1 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test1\"}");
+		JournalingQueue.Job j2 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test2\"}");
+		JournalingQueue.Job j3 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test3\"}");
 		jo.appendAdd(j1);
 		jo.appendAdd(j2);
 		jo.appendAdd(j3);
@@ -62,9 +62,9 @@ public class JournalTest extends TestCase {
 
 	public void testAddRemoveAndRestoreSeveralJobs() throws Exception {
 		JournalOutput jo = new JournalOutput(baseDir, new LinkedBlockingQueue<JournalingQueue.Job>());
-		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test1\"}");
-		JournalingQueue.Job j2 = new JournalingQueue.Job(0, System.currentTimeMillis(), "{\"message\":\"test2\"}");
-		JournalingQueue.Job j3 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test3\"}");
+		JournalingQueue.Job j1 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test1\"}");
+		JournalingQueue.Job j2 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test2\"}");
+		JournalingQueue.Job j3 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test3\"}");
 		jo.appendAdd(j1);
 		jo.appendAdd(j2);
 		jo.appendAdd(j3);
@@ -84,9 +84,9 @@ public class JournalTest extends TestCase {
 
 	public void testCreateAndRestoreSnapshot() throws Exception {
 	    JournalOutput jo = new JournalOutput(baseDir, new LinkedBlockingQueue<JournalingQueue.Job>());
-		JournalingQueue.Job j1 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test1\"}");
-		JournalingQueue.Job j2 = new JournalingQueue.Job(0, System.currentTimeMillis(), "{\"message\":\"test2\"}");
-		JournalingQueue.Job j3 = new JournalingQueue.Job(10, System.currentTimeMillis(), "{\"message\":\"test3\"}");
+		JournalingQueue.Job j1 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test1\"}");
+		JournalingQueue.Job j2 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test2\"}");
+		JournalingQueue.Job j3 = new JournalingQueue.Job(System.currentTimeMillis(), "{\"message\":\"test3\"}");
 		BlockingQueue<JournalingQueue.Job> q1 = new LinkedBlockingQueue<JournalingQueue.Job>();
 		q1.add(j1);
 		q1.add(j2);

@@ -63,14 +63,6 @@ public class JubbFacade {
 		mapper.writeValue(response.getOutputStream(), obj);
 	}
 
-	protected int getPriority(HttpServletRequest request) {
-		try {
-			return Integer.parseInt(request.getParameter("priority"));
-		} catch (NumberFormatException nfe) {
-			return 0;
-		}
-	}
-
 	private void _process(final HttpServletRequest request, final HttpServletResponse response, ProcessCallback callback) {
 		try {
 			Op op = null;
@@ -138,7 +130,7 @@ public class JubbFacade {
 								// default is 'add'
 								String data = request.getParameter("data");
 								if (data != null) {
-									q.add(getPriority(request), data);
+									q.add(data);
 								} 
 							}
 							return HttpServletResponse.SC_OK;
