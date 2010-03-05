@@ -54,11 +54,11 @@ public abstract class AbstractJournalAccess {
 	}
 
 	static class Record implements Serializable {
-		public final int op;
+		public final boolean add;
 		public final JournalingQueue.Job job;
 
-		public Record(int op, JournalingQueue.Job job) {
-			this.op = op;
+		public Record(boolean add, JournalingQueue.Job job) {
+			this.add = add;
 			this.job = job;
 		}
 	}		

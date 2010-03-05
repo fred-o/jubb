@@ -30,9 +30,9 @@ public class JournalInput extends AbstractJournalAccess {
 					q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
 					while (true) {
 						Record r = (Record) in.readObject();
-						if (r.op == 1) {
+						if (r.add) {
 							q.add(r.job);
-						} else if (r.op == 2) {
+						} else {
 							q.remove();
 						} 
 					}

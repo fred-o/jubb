@@ -43,10 +43,10 @@ public class JournalOutput extends AbstractJournalAccess {
 		this.out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f, true)));
 	}
 
-	private void appendRecord(int op, JournalingQueue.Job job) {
+	private void appendRecord(boolean add, JournalingQueue.Job job) {
 		try {
 			try {
-				this.out.writeObject(new Record(op, job));
+				this.out.writeObject(new Record(add, job));
  			} finally {
 				this.out.flush();
 			}
@@ -56,11 +56,11 @@ public class JournalOutput extends AbstractJournalAccess {
 	}
 
 	public void appendAdd(JournalingQueue.Job job) {
-		appendRecord(1, job);
+		appendRecord(true, job);
 	}
 
 	public void appendRemove(JournalingQueue.Job job) {
-		appendRecord(2, job);
+		appendRecord(false, job);
 	}
 
 	public void snapshot(BlockingQueue<JournalingQueue.Job> q) {
