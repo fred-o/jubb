@@ -11,7 +11,7 @@ import jubb.queue.jq.JournalingQueue;
 
 import junit.framework.TestCase;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked"})
 public class JournalTest extends TestCase {
 
 	private File baseDir;

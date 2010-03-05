@@ -17,12 +17,12 @@ public class AsyncJubbClient implements JubbClient {
 		this._client = new DirectJubbClient(uri);
 	}
 
-	public void post(int priority, String data) {
-		this._client.post(priority, data);
+	public void add(int priority, String data) {
+		this._client.add(priority, data);
 	}
     
-	public void post(int priority, Object data) {
-		this._client.post(priority, data);
+	public void add(int priority, Object data) {
+		this._client.add(priority, data);
 	}
 
 }

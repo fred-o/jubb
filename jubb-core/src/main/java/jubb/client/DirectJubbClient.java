@@ -6,15 +6,12 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.Arrays;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -41,12 +38,13 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	 * General method for accessing the queue and getting a job object
 	 * back.
 	 */
-	private <C> C _invoke(String op, String data, Call<C> callback) {
+	private <C> C _invoke(String op, int priority, String data, Call<C> callback) {
 		try {
 			HttpPost call = new HttpPost(uri);
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
 				Arrays.asList(
 					new BasicNameValuePair("op", op), 
+					new BasicNameValuePair("priority", intToString(priority)),
 					new BasicNameValuePair("data", data)));
 			call.setEntity(entity);
 			call.getParams().setIntParameter("http.connection.timeout", 10000);
@@ -68,18 +66,22 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 		return null;
 	}
 
+	private String intToString(int i) {
+		return i == 0 ? null : Integer.toString(i);
+	}
+
 	/**
 	 * @throws 
 	 */
-	public void post(int priority, String data) {
-		_invoke("add", data, VOID);
+	public void add(int priority, String data) {
+		_invoke("add", priority, data, VOID);
 	}
 
-	public void post(int priority, Object data) {
+	public void add(int priority, Object data) {
 		try {
 			StringWriter w = new StringWriter();
 			mapper.writeValue(w, data);
-			post(priority, w.toString());
+			add(priority, w.toString());
 		} catch (JsonGenerationException jge) {
 			jge.printStackTrace();
 		} catch (IOException ioe) {
@@ -88,7 +90,7 @@ public class DirectJubbClient implements JubbClient, JubbConsumer {
 	}
 
 	private <C> C _invoke(String op, Call<C> callback) {
-		return _invoke(op, null, callback);
+		return _invoke(op, 0, null, callback);
 	}
 
 	private static Call<Void> VOID = new Call<Void>() {

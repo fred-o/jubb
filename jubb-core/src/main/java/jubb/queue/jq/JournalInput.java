@@ -19,6 +19,7 @@ public class JournalInput extends AbstractJournalAccess {
 		super(dir);
 	}
 
+	@SuppressWarnings("unchecked")
 	public BlockingQueue<JournalingQueue.Job> restore() {
 		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
 		try {
