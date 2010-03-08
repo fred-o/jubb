@@ -2,6 +2,7 @@ package jubb.queue.jq;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,9 +15,10 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +30,7 @@ import jubb.queue.jq.JournalingQueue;
  * journaling scheme based on Java serialization. It does not support
  * different priorities for jobs.
  */
-public class JournalingQueue implements JubbQueue {
+public class JournalingQueue implements JubbQueue, Closeable {
 	private static final Logger LOG = Logger.getLogger(JournalingQueue.class);
 	private BlockingQueue<Job> _queue;
 	private File dir;
@@ -37,7 +39,7 @@ public class JournalingQueue implements JubbQueue {
 	private ObjectOutputStream out;
 	private BlockingQueue<JournalingQueue.Job> queue;
 	private int recordsWritten = 0;
-	private Executor executor = Executors.newSingleThreadExecutor();
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public JournalingQueue(File dir) throws IOException {
 		this.dir = dir;
@@ -81,16 +83,26 @@ public class JournalingQueue implements JubbQueue {
 	
 	public void close() {
 		try {
-			if(out != null) {
-				out.flush();
-				out.close();
+			LOG.info("Shutting down queue " + this + "...");
+			try {
+				executor.shutdown();
+				executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException ie) { 
 			}
+			flush();
 		}
 		catch (IOException ioe) {
 			LOG.error("Error closing journal: ", ioe);
 		}
 	}
-	
+
+	protected void flush() throws IOException {
+		if(out != null) {
+			out.flush();
+			out.close();
+		}
+	}
+
 	protected BlockingQueue<Job> restoreQueue() {
 		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
 		try {
@@ -163,7 +175,7 @@ public class JournalingQueue implements JubbQueue {
 	}
 
 	private void nextOutputStream() throws IOException {
-		close();
+		flush();
 		File f = nextFile();
 		this.out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f, true)));
 	}
