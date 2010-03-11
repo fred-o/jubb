@@ -24,13 +24,18 @@ import jubb.client.DirectJubbClient;
  */
 public class DirectJubbClient implements JubbClient {
 	private static final Logger LOG = Logger.getLogger(DirectJubbClient.class);
-	private HttpClient httpClient = new DefaultHttpClient();
+	private HttpClient httpClient;
 	private ObjectMapper mapper = new ObjectMapper();
 
 	private URI uri;
 
 	public DirectJubbClient(URI uri) {
+		this(uri, new DefaultHttpClient());
+	}
+
+	public DirectJubbClient(URI uri, HttpClient httpClient) {
 		this.uri = uri;
+		this.httpClient = httpClient;
 	}
 
 	/**
