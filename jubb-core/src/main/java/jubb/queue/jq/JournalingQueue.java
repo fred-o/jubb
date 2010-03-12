@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import jubb.queue.Job;
 import jubb.queue.JubbQueue;
 import jubb.queue.jq.JournalingQueue;
 
@@ -37,7 +38,6 @@ public class JournalingQueue implements JubbQueue, Closeable {
 	private File current;
 	private List<File> markedForDelete = new LinkedList<File>();
 	private ObjectOutputStream out;
-	private BlockingQueue<JournalingQueue.Job> queue;
 	private int recordsWritten = 0;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -55,24 +55,23 @@ public class JournalingQueue implements JubbQueue, Closeable {
 			});
 	}
 
-	public void add(String data) {
-		Job job = new Job(System.currentTimeMillis(), data);
+	public void add(Job job) {
 		this.executor.execute(new RecordWriter(new Record(true, job)));
 		this._queue.add(job);
 		System.out.println("ADD. " + _queue);
 	}
 
-	public String take() throws InterruptedException {
+	public Job take() throws InterruptedException {
 		Job job = this._queue.take();
 		this.executor.execute(new RecordWriter(new Record(false, null)));
-		return job.data;
+		return job;
 	}
 
-	public String poll() {
+	public Job poll() {
 		Job job = this._queue.poll();
 		if (job != null) {
 			this.executor.execute(new RecordWriter(new Record(false, null)));
-			return job.data;
+			return job;
 		} 
 		return null;
 	}
@@ -104,13 +103,13 @@ public class JournalingQueue implements JubbQueue, Closeable {
 	}
 
 	protected BlockingQueue<Job> restoreQueue() {
-		BlockingQueue<JournalingQueue.Job> q = new LinkedBlockingQueue<JournalingQueue.Job>();
+		BlockingQueue<Job> q = new LinkedBlockingQueue<Job>();
 		try {
 			File f = mostCurrentFile();
 			if (f != null) {
 				ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 				try {
-					q = (BlockingQueue<JournalingQueue.Job>) in.readObject();
+					q = (BlockingQueue<Job>) in.readObject();
 					while (true) {
 						Record r = (Record) in.readObject();
 						if (r.add) {
@@ -218,39 +217,13 @@ public class JournalingQueue implements JubbQueue, Closeable {
 	}
 
 	static class Record implements Serializable {
+		private static final long serialVersionUID = -5009378157068616991L;
 		public final boolean add;
-		public final JournalingQueue.Job job;
+		public final Job job;
 
-		public Record(boolean add, JournalingQueue.Job job) {
+		public Record(boolean add, Job job) {
 			this.add = add;
 			this.job = job;
-		}
-	}		
-	
-	static class Job implements Serializable {
-		final long timestamp;
-		final String data;
-
-		public Job(long timestamp, String data) {
-			if (data == null) 
-				throw new IllegalArgumentException("data cannot be null");
-			this.timestamp = timestamp;
-			this.data = data;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof Job))
-				return false;
-			Job other = (Job) obj;
-			if (this.timestamp != other.timestamp) 
-				return false;
-			return this.data.equals(other.data);
-		}
-
-		@Override
-		public String toString() {
-			return "[time=" + timestamp + ",data="+ data + "]";
 		}
 	}
 	

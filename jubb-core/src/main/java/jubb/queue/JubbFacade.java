@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,10 +51,10 @@ public class JubbFacade {
 		return new File(new File(System.getProperty("user.home")), ".jubb");
 	}
 
-	protected void sendString(HttpServletResponse response, String data) throws IOException {
+	protected void sendString(HttpServletResponse response, Job job) throws IOException {
 		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
 		try {
-			w.append(data);
+			w.append(job.data);
 		} finally {
 			w.flush();
 			w.close();
@@ -115,6 +117,16 @@ public class JubbFacade {
 			});
 	}
 
+	private List<String[]> extractMetadata(HttpServletRequest request) {
+		List<String[]> meta = new LinkedList<String[]>();
+		for(Iterator iter = request.getParameterMap().entrySet().iterator(); iter.hasNext();) {
+			Map.Entry<String, String> entry = (Map.Entry<String, String>) iter.next();
+			if (entry.getKey().startsWith("x-Jubb-"))
+				meta.add(new String[] { entry.getKey(), entry.getValue() });
+		}
+		return meta;
+	}
+
 	public void processPost(final HttpServletRequest request, final HttpServletResponse response) {
 		_process(request, response, new ProcessCallback() {
 				public int process(String path, Op op) throws IOException, InterruptedException {
@@ -130,7 +142,7 @@ public class JubbFacade {
 								// default is 'add'
 								String data = request.getParameter("data");
 								if (data != null) {
-									q.add(data);
+									q.add(new Job(System.currentTimeMillis(), data, null));
 								} 
 							}
 							return HttpServletResponse.SC_OK;
