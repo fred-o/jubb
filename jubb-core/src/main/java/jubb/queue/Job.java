@@ -29,6 +29,6 @@ public class Job implements Serializable {
 
 	@Override
 	public String toString() {
-		return "[time=" + timestamp + ",data="+ data + "]";
+		return "[time=" + timestamp + ",data="+ data + ",meta=" + metadata + "]";
 	}
 }

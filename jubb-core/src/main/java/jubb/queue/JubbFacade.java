@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,6 +53,11 @@ public class JubbFacade {
 	}
 
 	protected void sendString(HttpServletResponse response, Job job) throws IOException {
+		if (job.metadata != null) {
+			for(String[] meta: job.metadata) {
+				response.addHeader(meta[0], meta[1]);
+			}
+		}
 		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
 		try {
 			w.append(job.data);
@@ -119,10 +125,10 @@ public class JubbFacade {
 
 	private List<String[]> extractMetadata(HttpServletRequest request) {
 		List<String[]> meta = new LinkedList<String[]>();
-		for(Iterator iter = request.getParameterMap().entrySet().iterator(); iter.hasNext();) {
-			Map.Entry<String, String> entry = (Map.Entry<String, String>) iter.next();
-			if (entry.getKey().startsWith("x-Jubb-"))
-				meta.add(new String[] { entry.getKey(), entry.getValue() });
+		for(Enumeration names = request.getHeaderNames(); names.hasMoreElements();) {
+			String name = (String) names.nextElement();
+			if (name != null && name.startsWith("x-Jubb-")) 
+				meta.add(new String[] { name, request.getHeader(name) });
 		}
 		return meta;
 	}
@@ -141,8 +147,9 @@ public class JubbFacade {
 							} else {
 								// default is 'add'
 								String data = request.getParameter("data");
+								List<String[]> meta = extractMetadata(request);
 								if (data != null) {
-									q.add(new Job(System.currentTimeMillis(), data, null));
+									q.add(new Job(System.currentTimeMillis(), data, meta));
 								} 
 							}
 							return HttpServletResponse.SC_OK;
