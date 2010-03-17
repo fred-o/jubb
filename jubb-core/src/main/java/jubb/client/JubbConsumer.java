@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import jubb.client.JsonJubbClient;
-import jubb.client.JubbClient;
 import jubb.client.JubbConsumer;
 
 public abstract class JubbConsumer {

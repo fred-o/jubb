@@ -67,7 +67,6 @@ public abstract class AbstractJubbClient {
 	}
 
 	static interface Call<C> {
-
 		public C call(InputStream in, HttpResponse res) throws IOException;
 	}
 }
