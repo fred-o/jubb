@@ -6,11 +6,13 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.Arrays;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -24,9 +26,10 @@ import jubb.client.DirectJubbClient;
  */
 public class DirectJubbClient implements JubbClient {
 	private static final Logger LOG = Logger.getLogger(DirectJubbClient.class);
+	private static final String CLASS_HEADER = "x-Jubb-Javaclass";
+
 	private HttpClient httpClient;
 	private ObjectMapper mapper = new ObjectMapper();
-
 	private URI uri;
 
 	public DirectJubbClient(URI uri) {
@@ -42,9 +45,12 @@ public class DirectJubbClient implements JubbClient {
 	 * General method for accessing the queue and getting a job object
 	 * back.
 	 */
-	private <C> C _invoke(String op, String data, Call<C> callback, boolean close) {
+	private <C> C _invoke(String op, String data, Class<?> dataclass, Call<C> callback, boolean close) {
 		try {
 			HttpPost call = new HttpPost(uri);
+			if (dataclass != null) 
+				call.addHeader(new BasicHeader(CLASS_HEADER, dataclass.getName()));
+
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
 				Arrays.asList(
 					new BasicNameValuePair("op", op), 
@@ -53,6 +59,11 @@ public class DirectJubbClient implements JubbClient {
 			call.getParams().setIntParameter("http.connection.timeout", 10000);
 
 			HttpResponse res = httpClient.execute(call);
+			Header[] h = res.getHeaders(CLASS_HEADER);
+			if (h != null && h.length > 0) {
+				System.out.println("CLASS: " + h[0].getValue());
+			} 
+
 			if (res.getStatusLine().getStatusCode() == 200) {
 				InputStream in = res.getEntity().getContent();
 				try {
@@ -74,14 +85,14 @@ public class DirectJubbClient implements JubbClient {
 	 * @throws 
 	 */
 	public void add(String data) {
-		_invoke("add", data, VOID, true);
+		_invoke("add", data, null, VOID, true);
 	}
 
 	public void add(Object data) {
 		try {
 			StringWriter w = new StringWriter();
 			mapper.writeValue(w, data);
-			add(w.toString());
+			_invoke("add", w.toString(), data.getClass(), VOID, true);
 		} catch (JsonGenerationException jge) {
 			jge.printStackTrace();
 		} catch (IOException ioe) {
@@ -90,7 +101,7 @@ public class DirectJubbClient implements JubbClient {
 	}
 
 	private <C> C _invoke(String op, Call<C> callback, boolean close) {
-		return _invoke(op, null, callback, close);
+		return _invoke(op, null, null, callback, close);
 	}
 
 	private static Call<Void> VOID = new Call<Void>() {

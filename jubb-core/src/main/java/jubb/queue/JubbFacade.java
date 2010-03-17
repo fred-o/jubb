@@ -53,17 +53,19 @@ public class JubbFacade {
 	}
 
 	protected void sendString(HttpServletResponse response, Job job) throws IOException {
-		if (job.metadata != null) {
-			for(String[] meta: job.metadata) {
-				response.addHeader(meta[0], meta[1]);
+		if (job != null) {
+			if (job.metadata != null) {
+				for(String[] meta: job.metadata) {
+					response.addHeader(meta[0], meta[1]);
+				}
 			}
-		}
-		BufferedWriter w = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-		try {
-			w.append(job.data);
-		} finally {
-			w.flush();
-			w.close();
+			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
+			try {
+				w.append(job.data);
+			} finally {
+				w.flush();
+				w.close();
+			}
 		}
 	}
 

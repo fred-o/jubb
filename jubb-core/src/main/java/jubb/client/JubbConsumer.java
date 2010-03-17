@@ -9,12 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import jubb.client.JsonJubbClient;
 import jubb.client.JubbClient;
 import jubb.client.JubbConsumer;
 
 public abstract class JubbConsumer {
 	private static final Logger LOG = Logger.getLogger(JubbConsumer.class);
-	private JubbClient client;
+	private JsonJubbClient client;
 	private ScheduledExecutorService executorService;
 	private Method consumesMethod;
 	private Class<?> consumesClass;
@@ -58,7 +59,7 @@ public abstract class JubbConsumer {
 		executorService.shutdownNow();
 	}
 
-	public void setClient(JubbClient client) {
+	public void setClient(JsonJubbClient client) {
 	    this.client = client;
 	}
 
@@ -69,7 +70,7 @@ public abstract class JubbConsumer {
 	class Worker implements Runnable {
 
 		public void run() {
-			Object val = client.take(consumesClass);
+			Object val = client.take();
 			try {
 				consumesMethod.invoke(JubbConsumer.this, val);
 			}
