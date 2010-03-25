@@ -1,5 +1,6 @@
 package jubb.client;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -24,8 +25,6 @@ public class JubbConsumer {
 
 	public JubbConsumer() {
 	}
-
-	
 
 	public void start() {
 		if (executorService == null) {
@@ -73,23 +72,28 @@ public class JubbConsumer {
 
 	class Worker implements Runnable {
 		public void run() {
-			Object val = client.take();
-			if(val != null) {
-				try {
-					Method m = consumesMethods.get(val.getClass());
-					if (m != null) {
-						m.invoke(target, val);
-					} else {
-						LOG.warn("Cannot handle item with of class " + val.getClass());
-					}
+			try {
+				Object val = client.take();
+				if(val != null) {
+					try {
+						Method m = consumesMethods.get(val.getClass());
+						if (m != null) {
+							m.invoke(target, val);
+						} else {
+							LOG.warn("Cannot handle item with of class " + val.getClass());
+						}
 				
+					}
+					catch (InvocationTargetException ite) {
+						LOG.error("Error invoking consumer", ite);
+					}
+					catch (IllegalAccessException iae) {
+						LOG.error("Error invoking consumer", iae);
+					}
 				}
-				catch (InvocationTargetException ite) {
-					LOG.error("Error invoking consumer", ite);
-				}
-				catch (IllegalAccessException iae) {
-					LOG.error("Error invoking consumer", iae);
-				}
+			}
+			catch (IOException ioe) {
+				LOG.error("Error talking to the server", ioe);
 			}
 		}
 	}

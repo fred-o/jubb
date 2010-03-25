@@ -115,7 +115,7 @@ public class JournalingQueue implements JubbQueue, Closeable {
 						if (r.add) {
 							q.add(r.job);
 						} else {
-							q.remove();
+							q.poll();
 						} 
 					}
 				} finally {

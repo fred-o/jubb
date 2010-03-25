@@ -33,35 +33,31 @@ public abstract class AbstractJubbClient {
 	 * back.
 	 */
 	protected <C> C _invoke(String op, List<Header> metadata, List<NameValuePair> content,
-			Call<C> callback, boolean close) {
-		try {
-			HttpPost call = new HttpPost(uri);
-			if (metadata != null) {
-				for(Header meta: metadata) 
-				    call.addHeader(meta);
-			} 
-			List<NameValuePair> vals = new LinkedList<NameValuePair>();
-			vals.add(new BasicNameValuePair("op", op));
-			if (content != null) 
-				vals.addAll(content);
-			call.setEntity(new UrlEncodedFormEntity(vals));
+			Call<C> callback, boolean close) throws IOException {
+		HttpPost call = new HttpPost(uri);
+		if (metadata != null) {
+			for(Header meta: metadata) 
+				call.addHeader(meta);
+		} 
+		List<NameValuePair> vals = new LinkedList<NameValuePair>();
+		vals.add(new BasicNameValuePair("op", op));
+		if (content != null) 
+			vals.addAll(content);
+		call.setEntity(new UrlEncodedFormEntity(vals));
 
-			call.getParams().setIntParameter("http.connection.timeout", 10000);
+		call.getParams().setIntParameter("http.connection.timeout", 10000);
 
-			HttpResponse res = httpClient.execute(call);
-			if (res.getStatusLine().getStatusCode() == 200) {
-				InputStream in = res.getEntity().getContent();
-				try {
-					return callback.call(in, res);
-				} finally {
-					if (close)
-						in.close();
-				}
-			} else {
-				LOG.error("Calling '" + op + "' on queue at '" + uri + "' failed with reason: '" + res.getStatusLine().toString());
+		HttpResponse res = httpClient.execute(call);
+		if (res.getStatusLine().getStatusCode() == 200) {
+			InputStream in = res.getEntity().getContent();
+			try {
+				return callback.call(in, res);
+			} finally {
+				if (close)
+					in.close();
 			}
-		} catch (IOException ioe) {
-			LOG.error("Error calling '" + op + "' on queue at " + uri, ioe);
+		} else {
+			LOG.error("Calling '" + op + "' on queue at '" + uri + "' failed with reason: '" + res.getStatusLine().toString());
 		}
 		return null;
 	}

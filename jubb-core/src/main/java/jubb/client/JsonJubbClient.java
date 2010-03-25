@@ -43,7 +43,7 @@ public class JsonJubbClient extends AbstractJubbClient {
 		super(uri, httpClient);
 	}
 
-	public void add(Object data) {
+	public void add(Object data) throws IOException {
 		try {
 			StringWriter w = new StringWriter();
 			mapper.writeValue(w, data);
@@ -53,8 +53,6 @@ public class JsonJubbClient extends AbstractJubbClient {
 					VOID, true);
 		} catch (JsonGenerationException jge) {
 			jge.printStackTrace();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
 		}
 	}
 
@@ -66,19 +64,19 @@ public class JsonJubbClient extends AbstractJubbClient {
 		};
 	}
 
-	public Object poll() {
+	public Object poll() throws IOException {
 		return _invoke("poll", null, null, genericCall, true);
 	}
 
-	public <T> T poll(Class<T> clazz) {
+	public <T> T poll(Class<T> clazz) throws IOException {
 		return _invoke("poll", null, null, createJsonCall(clazz), true);
 	}
 
-	public Object take() {
+	public Object take() throws IOException {
 		return _invoke("take", null, null, genericCall, true);
 	}
 
-	public <T> T take(Class<T> clazz) {
+	public <T> T take(Class<T> clazz) throws IOException {
 		return _invoke("take", null, null, createJsonCall(clazz), true);
 	}
 
