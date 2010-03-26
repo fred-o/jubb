@@ -40,6 +40,7 @@ public class JubbFacade {
 	public JubbFacade(ServletConfig cfg) throws ServletException {
 		this.mapper = new ObjectMapper();
 		try {
+			File dir = getBaseDir(cfg);
 			this.manager =  new JournalingQueueManager(getBaseDir(cfg));
 			manager.createQueue("test");
 		} catch (IOException ioe) {
@@ -47,8 +48,17 @@ public class JubbFacade {
 		}
 	}
 
+	private File getDirFromName(String name) {
+		return name != null ? new File(name) : null;
+	}
+
 	private File getBaseDir(ServletConfig cfg) {
-		// TODO: do proper resolution based on servlet config
+		File dir = getDirFromName(cfg.getInitParameter("jubb.basedir"));
+		if (dir != null) 
+			return dir;
+		dir = getDirFromName(System.getProperty("jubb.basedir"));
+		if (dir != null)
+			return dir;
 		return new File(new File(System.getProperty("user.home")), ".jubb");
 	}
 

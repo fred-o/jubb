@@ -8,6 +8,10 @@
 	<servlet>
 		<servlet-name>queue-serlvet</servlet-name>
 		<servlet-class>jubb.servlet.QueueServlet</servlet-class>
+		<!-- <init-param> -->
+		<!-- 	<param-name>jubb.basedir</param-name> -->
+		<!-- 	<param-value>/tmp/jubb</param-value> -->
+		<!-- </init-param> -->
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
