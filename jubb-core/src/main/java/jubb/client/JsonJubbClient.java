@@ -17,7 +17,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 public class JsonJubbClient extends AbstractJubbClient {
-	private static final String CLASS_HEADER = "x-Jubb-Javaclass";
+	private static final String CLASS_HEADER = "X-Jubb-Javaclass";
 
 	private static Call<Void> VOID = new Call<Void>() {
 		public Void call(InputStream in, HttpResponse res) {
