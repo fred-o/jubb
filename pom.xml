@@ -10,6 +10,7 @@
 
 	<modules>
 		<module>jubb-core</module>
+		<module>jubb-client</module>
 		<module>jubb-servlet</module>
 	</modules>
 
