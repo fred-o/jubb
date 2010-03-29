@@ -3,6 +3,9 @@ package jubb.queue;
 
 public interface JubbQueue {
 
+	/**
+	 * Add a job to the end of the queue.
+	 */
 	public void add(Job job);
 
 	/**
@@ -15,6 +18,14 @@ public interface JubbQueue {
 	 */
 	public Job take() throws InterruptedException;
 
-	public int size();
+	/**
+	 * Return the number of jobs queued.
+	 */
+	public int getSize();
+
+	/**
+	 * Describe what type of queue this is.
+	 */
+	public String getType();
 
 }

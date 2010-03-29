@@ -114,19 +114,18 @@ public class JubbFacade {
 					Matcher m = QUEUE.matcher(path);
 					if (m.matches()) {
 						JubbQueue q = manager.getQueue(m.group(1));
-						if (q != null) {
-							sendObject(response, new QueueStatusBean(q.size()));
+						if (q != null) {	
+							sendObject(response, q);
 							return HttpServletResponse.SC_OK;
 						} 
 					} 
 					m = ROOT.matcher(path);
 					if (m.matches()) {
-						Map<String, QueueStatusBean> qs = new HashMap<String, QueueStatusBean>();
+						Map<String, JubbQueue> qs = new HashMap<String, JubbQueue>();
 						for(Iterator<String> iter = manager.getQueueNames(); iter.hasNext(); ) {
 							String name = iter.next();
 							JubbQueue q = manager.getQueue(name);
-						    QueueStatusBean sb = new QueueStatusBean(q.size());
-							qs.put(name, sb);
+							qs.put(name, q);
 							sendObject(response, qs);
 						}
 					} 
@@ -174,18 +173,6 @@ public class JubbFacade {
 
 	static interface ProcessCallback {
 		public int process(String path, Op op) throws IOException, InterruptedException;
-	}
-
-	public class QueueStatusBean {
-		private int size;
-		
-		public QueueStatusBean(int size) {
-			this.size = size;
-		}
-
-		public int getSize() {
-			return size;
-		}
 	}
  
 }

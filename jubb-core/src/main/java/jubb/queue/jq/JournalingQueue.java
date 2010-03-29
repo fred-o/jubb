@@ -76,8 +76,12 @@ public class JournalingQueue implements JubbQueue, Closeable {
 		return null;
 	}
 
-	public int size() {
+	public int getSize() {
 		return _queue.size();
+	}
+
+	public String getType() {
+		return "Journaling queue";
 	}
 	
 	public void close() {

@@ -30,16 +30,16 @@ public class JournalingQueueTest extends TestCase {
 		jq1.add(new Job(0, "test1", null));
 		jq1.add(new Job(0, "test2", null));
 		jq1.add(new Job(0, "test3", null));
-		assertEquals(3, jq1.size());
+		assertEquals(3, jq1.getSize());
 		assertEquals("test1", jq1.poll().data);
-		assertEquals(2, jq1.size());
+		assertEquals(2, jq1.getSize());
 		jq1.add(new Job(0, "test1", null));
-		assertEquals(3, jq1.size());
+		assertEquals(3, jq1.getSize());
 		jq1.close();
 		jq1 = null;
 
 		JournalingQueue jq2 = new JournalingQueue(baseDir);
-		assertEquals(3, jq2.size());
+		assertEquals(3, jq2.getSize());
 		assertEquals("test2", jq2.poll().data);
 		assertEquals("test3", jq2.poll().data);
 		assertEquals("test1", jq2.poll().data);
