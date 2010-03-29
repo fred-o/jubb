@@ -139,7 +139,7 @@ public class JubbFacade {
 		List<String[]> meta = new LinkedList<String[]>();
 		for(Enumeration names = request.getHeaderNames(); names.hasMoreElements();) {
 			String name = (String) names.nextElement();
-			if (name != null && name.startsWith("x-Jubb-")) 
+			if (name != null && name.startsWith("X-Jubb-")) 
 				meta.add(new String[] { name, request.getHeader(name) });
 		}
 		return meta;
