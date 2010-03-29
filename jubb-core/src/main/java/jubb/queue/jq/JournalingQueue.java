@@ -32,14 +32,16 @@ import jubb.queue.jq.JournalingQueue;
  * different priorities for jobs.
  */
 public class JournalingQueue implements JubbQueue, Closeable {
-	private static final Logger LOG = Logger.getLogger(JournalingQueue.class);
-	private BlockingQueue<Job> _queue;
-	private File dir;
-	private File current;
-	private List<File> markedForDelete = new LinkedList<File>();
-	private ObjectOutputStream out;
-	private int recordsWritten = 0;
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	private static final Logger LOG		   = Logger.getLogger(JournalingQueue.class);
+	private static final int	MAX_LENGTH = 1000;
+
+	private BlockingQueue<Job>	_queue;
+	private File				dir;
+	private File				current;
+	private List<File>			markedForDelete = new LinkedList<File>();
+	private ObjectOutputStream	out;
+	private int					recordsWritten	= 0;
+	private ExecutorService		executor		= Executors.newSingleThreadExecutor();
 
 	public JournalingQueue(File dir) throws IOException {
 		this.dir = dir;
@@ -210,7 +212,7 @@ public class JournalingQueue implements JubbQueue, Closeable {
 				} finally {
 					out.flush();
 				}
-				if(++recordsWritten > 100) {
+				if(++recordsWritten > MAX_LENGTH) {
 					snapshot();
 					recordsWritten = 0;
 				}
