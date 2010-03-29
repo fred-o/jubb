@@ -53,11 +53,11 @@ public class JubbFacade {
 	}
 
 	private File getBaseDir(ServletConfig cfg) {
-		File dir = getDirFromName(cfg.getInitParameter("jubb.basedir"));
-		if (dir != null) 
-			return dir;
-		dir = getDirFromName(System.getProperty("jubb.basedir"));
+		File dir = getDirFromName(System.getProperty("jubb.basedir"));
 		if (dir != null)
+			return dir;
+		dir = getDirFromName(cfg.getInitParameter("jubb.basedir"));
+		if (dir != null) 
 			return dir;
 		return new File(new File(System.getProperty("user.home")), ".jubb");
 	}
